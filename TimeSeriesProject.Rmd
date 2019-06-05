@@ -1,0 +1,140 @@
+---
+title: "TimeSeriesProject"
+author: "Srihari Seshadri"
+date: "June 5, 2019"
+output: html_document
+---
+
+
+```{r message=FALSE, warning=FALSE}
+# Load libraries and install them, if necessary
+tmp.library.list <- c("haven", 
+                      "zoo", 
+                      "fUnitRoots", 
+                      "tseries", 
+                      "urca",
+                      "lmtest",
+                      "forecast",
+                      "data.table",
+                      "readxl",
+                      "reshape",
+                      "quantmod", 
+                      "ggplot2", 
+                      "reshape2",
+                      "plyr",
+                      "scales", 
+                      "hts", 
+                      "fpp2", 
+                      "lubridate",
+                      "stargazer",
+                      "GGally")
+for (i in 1:length(tmp.library.list)) {
+  if (!tmp.library.list[i] %in% rownames(installed.packages())) {
+    install.packages(tmp.library.list[i])
+  }
+  library(tmp.library.list[i], character.only = TRUE)
+}
+rm(tmp.library.list)
+```
+
+
+
+```{r message=FALSE, warning=FALSE}
+RawData <- "./RawData"
+# Load the dataset
+dengue.features <- data.table(read.csv(paste0(RawData,"/dengue_features_train.csv"), sep=',', stringsAsFactors = F))
+dengue.labels <- data.table(read.csv(paste0(RawData,"/dengue_labels_train.csv"), sep=',', stringsAsFactors = F))
+
+head(dengue.features)
+head(dengue.labels)
+```
+
+Merge the features data with the labels data
+
+```{r message=FALSE, warning=FALSE}
+dengue.data <- merge(dengue.features, dengue.labels, by=c("city", "year", "weekofyear"), all.x = T)
+head(dengue.data)
+```
+
+```{r message=FALSE, warning=FALSE}
+# Omit reanalysis_sat_precip_amt_mm variable because of large amount of missing data
+dengue.data[, reanalysis_sat_precip_amt_mm := NULL]
+# Sort the dataset so it's in a clear order
+setkeyv(dengue.data, c("city", "year", "weekofyear"))
+```
+
+```{r message=FALSE, warning=FALSE}
+str(dengue.data)
+```
+
+We will analyse the city San Juan to study the progression of the disease
+
+```{r message=FALSE, warning=FALSE}
+sjdata <- dengue.data[city=="sj"]
+```
+
+
+## Train test split
+
+```{r}
+# Look at the structure of data for SJ
+str(sjdata)
+head(sjdata)
+```
+
+Make the date columns into a Date time format
+```{r}
+sjdata[,week_start_date := as.Date(week_start_date,format = "%Y-%m-%d")]
+```
+
+
+What are the range of dates available to us?
+```{r message=FALSE, warning=FALSE}
+min(sjdata$week_start_date)
+max(sjdata$week_start_date)
+```
+
+
+Let's set aside 5 years of data for model validation
+```{r message=FALSE, warning=FALSE}
+sjdata.train <- sjdata[week_start_date < "2003-01-01"]
+sjdata.test <- sjdata[week_start_date >= "2003-01-01"]
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
