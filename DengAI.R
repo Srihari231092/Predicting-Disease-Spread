@@ -1,6 +1,6 @@
 # Set Up R
 #  folders structure
-projects <- "/Users/namsan/Desktop/Spring\ 2018/PredictiveClass/projects"
+projects <- "C:/GitHub/Predicting-Disease-Spread/"
 
 # Shortcuts to folders of interest
 CleanData <- paste0(projects,"/CleanData")
@@ -123,6 +123,7 @@ iqdata <- trainprep[city=="iq"]
   # sjdata.train[,grep("^ndvi", colnames(sjdata.train)) := NULL]
   
   # build a function to impute data with the most recent that is non missing
+  # NOTE : Explore SPline
   na.locf.data.frame <- 
     function(object, ...) replace(object, TRUE, lapply(object, na.locf, ...))
   
@@ -217,6 +218,10 @@ iqdata <- trainprep[city=="iq"]
     labs(title = "Partial Autocorrelation Function Plot (Iquitos)") +
     theme_bw()
 
+  
+  decomp = stl(sjtrain.ts, s.window="periodic")
+  plot(decomp)
+  
     
 # =============================================================================
 # Model 1 - SARIMA 
@@ -228,7 +233,7 @@ iqdata <- trainprep[city=="iq"]
   
   checkresiduals(sj.fit1)
   
-  #
+  # NOTE : Loop exiting after 1 iteration
   fit <- list(aicc=Inf)
   for(i in 1:25)
   {
@@ -312,7 +317,7 @@ iqdata <- trainprep[city=="iq"]
                                  ,sjtrain.ts1)
 
   
-  
+  # NOTE : Understand this better
   # CCF plot -> week 3,4
   #differencing 
   sjtrain.ts.diff1 = diff(sjtrain.ts,1)
