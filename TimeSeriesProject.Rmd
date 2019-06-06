@@ -89,13 +89,19 @@ summary(sjdata.train)
 # Correlation plots
 ggcorr(sjdata.train[, 5:26], label = TRUE, hjust = 0.85, size = 2,color = "grey50",
        label_size = 2) +
-  ggplot2::labs(title = "Correlation Plot (San Juan)")
+  ggplot2::labs(title = "Correlation Plot")
+
+ggsave("./Charts/EDA_correlation.png", width = 8, height = 6)
+
 ```
 
 ```{r message=FALSE, warning=FALSE}
 ggplot(data=sjdata.train, aes(sjdata.train$total_cases)) + 
   geom_histogram() + 
   ggtitle("Distrbution of total cases of Dengue") 
+
+ggsave("./Charts/total_cases_distribution.png", width = 8, height = 6)
+
 ```
 
 ```{r}
@@ -118,8 +124,11 @@ ggplot(sjdata.train , aes(week_start_date, total_cases)) +
   ylab("Total cases in San Juan") +
   xlab("")+
   theme(axis.text.x=element_text(angle=-70, hjust=0.001)) +
-  labs(title = "Time Series Plot of Total Cases (San Juan)") +
+  labs(title = "Time Series Plot of Total Cases") +
   theme_bw()
+
+ggsave("./Charts/time_series_totalcases.png", width = 8, height = 6)
+
 ```
 
 ```{r}
@@ -143,7 +152,7 @@ ggplot(sjdata.train, aes(week_start_date)) +
   labs(title = "Log Total Cases and Maximum Temperature ") +
   theme_bw() +theme(legend.position="bottom")
 
-ggsave("time_series_logtotalcases_maxtemp.png", width = 8, height = 6)
+ggsave("./Charts/time_series_logtotalcases_maxtemp.png", width = 8, height = 6)
 
 ```
 
@@ -157,7 +166,7 @@ ggplot(sjdata.train, aes(week_start_date)) +
   labs(title = "Log Total Cases and Humidity") +
   theme_bw() + theme(legend.position="bottom")
 
-ggsave("time_series_logtotalcases_humidity.png", width = 8, height = 6)
+ggsave("./Charts/time_series_logtotalcases_humidity.png", width = 8, height = 6)
 ```
 
 
@@ -198,13 +207,19 @@ The time series is stationary.
 ```{r}
 # ACF Plot
 ggAcf(sjtrain.ts) +
-  labs(title = "Autocorrelation Function Plot (San Juan)") +
+  labs(title = "Autocorrelation Function Plot") +
   theme_bw()
+
+ggsave("./Charts/ACF.png", width = 8, height = 6)
+
 
 # PACF Plot
 ggPacf(sjtrain.ts)  +
   labs(title = "Partial Autocorrelation Function Plot (San Juan)") +
   theme_bw()
+
+ggsave("./Charts/PACF.png", width = 8, height = 6)
+
 ```
 
 We can observe significant autocorrelation and seasonality.
@@ -417,6 +432,9 @@ ggplot() +
   geom_line(mapping=aes(x=sjdata.test$week_start_date, y=fc0$mean, color="pred")) + 
   theme_light() + theme(legend.position = "right") + 
   ggtitle("ARIMA vs. Ground Truth")
+
+ggsave("./Charts/ARIMA vs. Ground Truth.png", width = 8, height = 6)
+
 ```
 
 ```{r}
@@ -430,6 +448,9 @@ ggplot() +
   geom_line(mapping=aes(x=sjdata.test$week_start_date, y=fc1$mean, color="pred")) + 
   theme_light() + theme(legend.position = "right") + 
   ggtitle("SARIMA vs. Ground Truth")
+
+ggsave("./Charts/SARIMA vs. Ground Truth.png", width = 8, height = 6)
+
 ```
 
 ```{r}
@@ -447,6 +468,9 @@ ggplot() +
   geom_line(mapping=aes(x=sjdata.test$week_start_date, y=fc2$mean, color="pred")) + 
   theme_light() + theme(legend.position = "right") + 
   ggtitle("SARIMAX Lag 4 vs. Ground Truth")
+
+ggsave("./Charts/SARIMAX Lag 4 vs. Ground Truth.png", width = 8, height = 6)
+
 ```
 
 ```{r}
@@ -463,6 +487,9 @@ ggplot() +
   geom_line(mapping=aes(x=sjdata.test$week_start_date, y=fc3$mean, color="pred")) + 
   theme_light() + theme(legend.position = "right") + 
   ggtitle("SARIMAX Lag 1 vs. Ground Truth")
+
+ggsave("./Charts/SARIMAX Lag 1 vs. Ground Truth.png", width = 8, height = 6)
+
 ```
 
 ```{r}
@@ -476,5 +503,8 @@ ggplot() +
   geom_line(mapping=aes(x=sjdata.test$week_start_date, y=fc4$mean, color="pred")) + 
   theme_light() + theme(legend.position = "right") + 
   ggtitle("Neural networks prediction vs. Ground Truth")
+
+ggsave("./Charts/Neural networks prediction vs. Ground Truth.png", width = 8, height = 6)
+
 ```
 
