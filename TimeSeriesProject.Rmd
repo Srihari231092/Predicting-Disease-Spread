@@ -7,7 +7,7 @@ output: html_document
 
 ```{r message=FALSE, warning=FALSE}
 # Load libraries and install them, if necessary
-tmp.library.list <- c("haven", "zoo", "fUnitRoots", "tseries", "urca", "lmtest", "forecast", "data.table", "readxl","reshape", "quantmod", "ggplot2", "reshape2", "plyr","scales", "hts", "fpp2", "lubridate","stargazer","GGally", "dplyr")
+tmp.library.list <- c("haven", "zoo", "fUnitRoots", "tseries", "urca", "lmtest", "forecast", "data.table", "readxl","reshape", "quantmod", "ggplot2", "reshape2", "plyr","scales", "hts", "fpp2", "lubridate","stargazer","GGally", "dplyr", "lattice")
 for (i in 1:length(tmp.library.list)) {
   if (!tmp.library.list[i] %in% rownames(installed.packages())) {
     install.packages(tmp.library.list[i])
@@ -49,7 +49,8 @@ Sort the dataset so it's in a clear order
 ```{r}
 setkeyv(sjdata, c("city", "year", "weekofyear"))
 
-str(sjdata)
+library(skimr)
+skim(sjdata)
 ```
 
 ```{r}
@@ -103,11 +104,6 @@ ggplot(data=sjdata.train, aes(sjdata.train$total_cases)) +
 ggsave("./Charts/total_cases_distribution.png", width = 8, height = 6)
 
 ```
-
-```{r}
-
-```
-
 
 ```{r}
 (missing_idxs <- c(which(is.na(sjdata.train$total_cases), arr.ind=TRUE)))
@@ -247,24 +243,6 @@ checkresiduals(sj.fit1)
 ```
 
 
-Let's take the fourier transform of the signal and evaluate the model residuals
-
-```{r}
-# fit <- list(aicc=Inf)
-# for(i in 1:25)
-# {
-#   fit1 <- auto.arima(sjtrain.ts, xreg=fourier(sjtrain.ts, K=i), seasonal=F)
-#   if(fit$aicc < fit1$aicc)
-#     fit1 <- fit
-#   else break;
-# }
-# fit1
-```
-
-```{r}
-checkresiduals(fit1)
-```
-
 ### SARIMA
 
 Apply Seasonal ARIMA to the data and analyse the residuals.
@@ -276,29 +254,13 @@ sj.fit2
 checkresiduals(sj.fit2)
 ```
 
-Let's take the fourier transform of the signal and evaluate the model residuals
-```{r}
-fit <- list(aicc=Inf)
-for(i in 1:25)
-{
-  fit1 <- auto.arima(sjtrain.ts, xreg=fourier(sjtrain.ts, K=i), seasonal=T)
-  if(fit$aicc < fit1$aicc)
-    fit1 <- fit
-  else break;
-}
-(fit1)
-```
-
-```{r}
-checkresiduals(fit1)
-```
 
 ### SARIMAX
 
-```{r}
-# prepare xreg
-sjtrain.ts1 <- ts(sjdata.train.imputed, 
-                  freq=365.25/7, 
+```{r, warning=FALSE}
+# Prepare xreg
+sjtrain.ts1 <- ts(sjdata.train.imputed,
+                  freq=365.25/7,
                   start=decimal_date(ymd("1990-04-30")))
 
 varlist <- c("precipitation_amt_mm"
@@ -320,6 +282,50 @@ create.tslag <- function(x, dataset) {
 }
 
 ```
+
+
+Plot distributions of the feature vectors
+
+
+```{r message=FALSE, warning=FALSE}
+ggplot() + 
+  geom_line(mapping=aes(x=week_start_date, y=precipitation_amt_mm), data=sjdata.train.imputed) +
+  theme_bw() + 
+  ggtitle("Precipitation across time")
+
+ggplot() + 
+  geom_line(mapping=aes(x=week_start_date, y=station_avg_temp_c), data=sjdata.train.imputed) +
+  theme_bw() + 
+  ggtitle("Average temperature across time")
+
+ggplot() + 
+  geom_line(mapping=aes(x=week_start_date, y=station_min_temp_c), data=sjdata.train.imputed) +
+  theme_bw() + 
+  ggtitle("Miimum temperature across time")
+
+ggplot() + 
+  geom_line(mapping=aes(x=week_start_date, y=reanalysis_dew_point_temp_k), data=sjdata.train.imputed) +
+  theme_bw() + 
+  ggtitle("Dew point across time")
+
+
+ggplot() + 
+  geom_line(mapping=aes(x=week_start_date, y=station_diur_temp_rng_c), data=sjdata.train.imputed) +
+  theme_bw() + 
+  ggtitle("Diur temperature across time")
+
+ggplot() + 
+  geom_line(mapping=aes(x=week_start_date, y=reanalysis_relative_humidity_percent), data=sjdata.train.imputed) +
+  theme_bw() + 
+  ggtitle("Relative humidity across time")
+
+ggplot() + 
+  geom_line(mapping=aes(x=week_start_date, y=station_max_temp_c), data=sjdata.train.imputed) +
+  theme_bw() + 
+  ggtitle("Station max temperature across time")
+
+```
+
 
 ```{r}
 precipitation <- create.tslag(x = "precipitation_amt_mm"
@@ -344,53 +350,42 @@ min.temp <- create.tslag(x = "station_min_temp_c"
                          ,sjtrain.ts1)
 ```
 
+Apply Seasonal ARIMAX to the data and analyse the residuals.
+
 ```{r}
-# CCF plot -> week 3,4
-#differencing 
-sjtrain.ts.diff1 = diff(sjtrain.ts,1)
-dew.temp.diff1 = diff(dew.temp[,1],1)
-#ccf(dew.temp.diff1,
-#    sjtrain.ts.diff1,
-#    type = c("correlation","covariance")) 
-
-# final model
-fw <- fourier(sjtrain.ts, K=2)
-
-fit2 <- auto.arima(sjtrain.ts, xreg=cbind(precipitation[,4], relative.humidity[,4]
-                                          ,dew.temp[,4], avg.temp[,4]
-                                          ,diur.temp[,4],max.temp[,4]
-                                          ,min.temp[,4],fw))
-
-fit2
-
-checkresiduals(fit2)
-
-fit3 <- auto.arima(sjtrain.ts, xreg=cbind(precipitation[,1],relative.humidity[,1]
+sj.fit3 <- auto.arima(sjtrain.ts, xreg=cbind(precipitation[,1],relative.humidity[,1]
                                           ,dew.temp[,1],avg.temp[,1]
                                           ,diur.temp[,1],max.temp[,1]
-                                          ,min.temp[,1],fw))
-fit3
-checkresiduals(fit3)
+                                          ,min.temp[,1]), seasonal=TRUE)
+sj.fit3
+checkresiduals(sj.fit3)
 ```
 
 ### Neural Network
 
 ```{r}
 # Fit Neural Network
-fit4 <- nnetar(sjtrain.ts,xreg=sjtrain.ts1[,5:23])
-fit4
+sj.fit4 <- nnetar(sjtrain.ts,xreg=sjtrain.ts1[,5:23])
+
+sj.fit4
+checkresiduals(sj.fit4)
 ```
+
+```{r}
+Box.test(sj.fit4$residuals, type = "Ljung-Box")
+```
+
 
 ## Model Selection
 
-```{r}
+```{r, warning=FALSE}
 # Fill in NAs
 sjdata.test.imputed <- na.locf.data.frame(sjdata.test)
 summary(sjdata.test.imputed)
 
 # Convert data to TS
 sjtest.ts1 <- ts(sjdata.test.imputed, 
-                 freq=365.25/7, 
+                 freq=52, 
                  start=decimal_date(ymd("2003-01-01")))
 ```
 
@@ -422,7 +417,7 @@ min.temp1 <- create.tslag(x = "station_min_temp_c"
 ### Evaluate the model accuracies
 
 ```{r}
-# Try ARIMA
+# Model 1 (ARIMA)
 fc0 <- forecast(sj.fit1,h=277)
 plot(fc0)
 accuracy(fc0$mean, as.integer(sjtest.ts1[,"total_cases"]))
@@ -438,8 +433,8 @@ ggsave("./Charts/ARIMA vs. Ground Truth.png", width = 8, height = 6)
 ```
 
 ```{r}
-# Try SARIMA
-fc1 <- forecast(fit1, xreg=fourier(sjtrain.ts, K=1, h=277))
+# Model 2 (SARIMA)
+fc1 <- forecast(sj.fit2, h=277)
 plot(fc1)
 accuracy(fc1$mean, as.integer(sjtest.ts1[,"total_cases"]))
 
@@ -453,32 +448,13 @@ ggsave("./Charts/SARIMA vs. Ground Truth.png", width = 8, height = 6)
 
 ```
 
-```{r}
-# Try SARIMAX with lag 4
-fwf <- fourier(sjtrain.ts, K=2, h=277)
-fc2 <- forecast(fit2, xreg=cbind(precipitation1[,4],relative.humidity1[,4]
-                                 ,dew.temp1[,4],avg.temp1[,4]
-                                 ,diur.temp1[,4],max.temp1[,4]
-                                 ,min.temp1[,4],fwf), h =277)
-plot(fc2)
-accuracy(fc2$mean, as.integer(sjtest.ts1[,"total_cases"]))
 
-ggplot() + 
-  geom_line(mapping=aes(x=week_start_date, y=total_cases, color="ori"), data=sjdata.test) + 
-  geom_line(mapping=aes(x=sjdata.test$week_start_date, y=fc2$mean, color="pred")) + 
-  theme_light() + theme(legend.position = "right") + 
-  ggtitle("SARIMAX Lag 4 vs. Ground Truth")
-
-ggsave("./Charts/SARIMAX Lag 4 vs. Ground Truth.png", width = 8, height = 6)
-
-```
-
-```{r}
-# Try SARIMAX with lag 1
-fc3 <- forecast(fit3, xreg=cbind(precipitation1[,1],relative.humidity1[,1]
+```{r, warning=FALSE}
+# Model 3 (SARIMAX)
+fc3 <- forecast(sj.fit3, xreg=cbind(precipitation1[,1],relative.humidity1[,1]
                                  ,dew.temp1[,1],avg.temp1[,1]
                                  ,diur.temp1[,1],max.temp1[,1]
-                                 ,min.temp1[,1],fwf), h =277)
+                                 ,min.temp1[,1]), h =277)
 plot(fc3)
 accuracy(fc3$mean,as.integer(sjtest.ts1[,"total_cases"]))
 
@@ -486,15 +462,16 @@ ggplot() +
   geom_line(mapping=aes(x=week_start_date, y=total_cases, color="ori"), data=sjdata.test) + 
   geom_line(mapping=aes(x=sjdata.test$week_start_date, y=fc3$mean, color="pred")) + 
   theme_light() + theme(legend.position = "right") + 
-  ggtitle("SARIMAX Lag 1 vs. Ground Truth")
+  ggtitle("SARIMAX vs. Ground Truth")
 
-ggsave("./Charts/SARIMAX Lag 1 vs. Ground Truth.png", width = 8, height = 6)
+ggsave("./Charts/SARIMAX vs. Ground Truth.png", width = 8, height = 6)
 
 ```
 
+
 ```{r}
 # Try NN
-fc4 <- forecast(fit4, xreg=sjtest.ts1[,5:23], h=277)
+fc4 <- forecast(sj.fit4, xreg=sjtest.ts1[,5:23], h=277)
 autoplot(fc4)
 accuracy(fc4$mean,as.integer(sjtest.ts1[,"total_cases"]))
 
@@ -507,4 +484,5 @@ ggplot() +
 ggsave("./Charts/Neural networks prediction vs. Ground Truth.png", width = 8, height = 6)
 
 ```
+
 

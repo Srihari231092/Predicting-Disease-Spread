@@ -253,24 +253,6 @@ checkresiduals(sj.fit1)
 ```
 
 
-Let's take the fourier transform of the signal and evaluate the model residuals
-
-```{r}
-# fit <- list(aicc=Inf)
-# for(i in 1:25)
-# {
-#   fit1 <- auto.arima(sjtrain.ts, xreg=fourier(sjtrain.ts, K=i), seasonal=F)
-#   if(fit$aicc < fit1$aicc)
-#     fit1 <- fit
-#   else break;
-# }
-# fit1
-```
-
-```{r}
-# checkresiduals(fit1)
-```
-
 ### SARIMA
 
 Apply Seasonal ARIMA to the data and analyse the residuals.
@@ -280,23 +262,6 @@ sj.fit2 <- auto.arima(sjtrain.ts, seasonal = T)
 sj.fit2
 
 checkresiduals(sj.fit2)
-```
-
-Let's take the fourier transform of the signal and evaluate the model residuals
-```{r}
-# fit <- list(aicc=Inf)
-# for(i in 1:25)
-# {
-#   fit1 <- auto.arima(sjtrain.ts, xreg=fourier(sjtrain.ts, K=i), seasonal=T)
-#   if(fit$aicc < fit1$aicc)
-#     fit1 <- fit
-#   else break;
-# }
-# (fit1)
-```
-
-```{r}
-# checkresiduals(fit1)
 ```
 
 ### SARIMAX
@@ -383,7 +348,7 @@ checkresiduals(fit3)
 
 ```{r}
 # Fit Neural Network
-fit4 <- nnetar(sjtrain.ts,xreg=sjtrain.ts1[,5:23])
+nn.fit4 <- nnetar(sjtrain.ts,xreg=sjtrain.ts1[,5:23])
 fit4
 ```
 
@@ -404,10 +369,6 @@ plot(decomp)
 sjtest.ts1 <- seasadj(decomp)
 
 ```
-
-```{r}
-```
-
 
 ```{r}
 # Take lags of predictors
