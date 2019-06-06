@@ -6,17 +6,6 @@ output: html_document
 ---
 
 ```{r message=FALSE, warning=FALSE}
-# Set working library
-projects <- getwd()# "D:/Dev/Sources/Projects/GitProjects/Predicting-Disease-Spread/"
-
-# Shortcuts to folders of interest
-CleanData <- paste0(projects,"/CleanData")
-Dictionaries <- paste0(projects,"/Dictionaries")
-RawData <- paste0(projects,"/RawData")
-RCode <- paste0(projects,"/RCode")
-RData <- paste0(projects,"/RData")
-Output <- paste0(projects,"/Output")
-
 # Load libraries and install them, if necessary
 tmp.library.list <- c("haven", "zoo", "fUnitRoots", "tseries", "urca", "lmtest", "forecast", "data.table", "readxl","reshape", "quantmod", "ggplot2", "reshape2", "plyr","scales", "hts", "fpp2", "lubridate","stargazer","GGally")
 for (i in 1:length(tmp.library.list)) {
@@ -30,10 +19,8 @@ rm(tmp.library.list)
 
 
 ```{r}
-trainraw <- data.table(read.csv(paste0(RawData,"/dengue_features_train.csv"), sep=',', stringsAsFactors = F))
-trainlraw <- data.table(read.csv(paste0(RawData,"/dengue_labels_train.csv"), sep=',', stringsAsFactors = F))
-testraw <- data.table(read.csv(paste0(RawData,"/dengue_features_test.csv"), sep=',', stringsAsFactors = F))
-submission <- data.table(read.csv(paste0(RawData,"/submission_format.csv"), sep=',', stringsAsFactors = F))
+trainraw <- data.table(read.csv("dengue_features_train.csv"), sep=',', stringsAsFactors = F)
+trainlraw <- data.table(read.csv("dengue_labels_train.csv"), sep=',', stringsAsFactors = F)
 
 head(trainraw)
 head(trainlraw)
