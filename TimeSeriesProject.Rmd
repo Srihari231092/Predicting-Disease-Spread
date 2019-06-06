@@ -1,13 +1,13 @@
 ---
 title: "TimeSeriesProject"
-author: "Srihari Seshadri"
+author: "Srihari Seshadri, Siddhartha Khetawat"
 date: "June 5, 2019"
 output: html_document
 ---
 
 ```{r message=FALSE, warning=FALSE}
 # Set working library
-projects <- "D:/Dev/Sources/Projects/GitProjects/Predicting-Disease-Spread/"
+projects <- getwd()# "D:/Dev/Sources/Projects/GitProjects/Predicting-Disease-Spread/"
 
 # Shortcuts to folders of interest
 CleanData <- paste0(projects,"/CleanData")
@@ -152,6 +152,8 @@ na.locf.data.frame <-
 # Fill in NAs
 sjdata.train.imputed <- na.locf.data.frame(sjdata.train)
 summary(sjdata.train.imputed)
+
+sjdata.train <- sjdata.train.imputed
 ```
 
 ## Diagnostic study
