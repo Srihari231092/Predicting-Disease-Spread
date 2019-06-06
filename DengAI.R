@@ -1,6 +1,6 @@
 # Set Up R
 #  folders structure
-projects <- "C:/GitHub/Predicting-Disease-Spread/"
+projects <- "D:/Dev/Sources/Projects/GitProjects/Predicting-Disease-Spread/"
 
 # Shortcuts to folders of interest
 CleanData <- paste0(projects,"/CleanData")
