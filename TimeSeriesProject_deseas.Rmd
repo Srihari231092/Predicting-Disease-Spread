@@ -411,12 +411,6 @@ min.temp1 <- create.tslag(x = "station_min_temp_c"
 fc0 <- forecast(sj.fit1,h=277)
 plot(fc0)
 accuracy(fc0$mean, as.integer(sjtest.ts1[,"total_cases"]))
-
-ggplot() + 
-  geom_line(mapping=aes(x=week_start_date, y=total_cases, color="ori"), data=sjdata.test) + 
-  geom_line(mapping=aes(x=sjdata.test$week_start_date, y=fc0$mean, color="pred")) + 
-  theme_light() + theme(legend.position = "right") + 
-  ggtitle("ARIMA vs. Ground Truth")
 ```
 
 ```{r}
@@ -424,12 +418,6 @@ ggplot() +
 fc1 <- forecast(fit1, xreg=fourier(sjtrain.ts, K=1, h=277))
 plot(fc1)
 accuracy(fc1$mean, as.integer(sjtest.ts1[,"total_cases"]))
-
-ggplot() + 
-  geom_line(mapping=aes(x=week_start_date, y=total_cases, color="ori"), data=sjdata.test) + 
-  geom_line(mapping=aes(x=sjdata.test$week_start_date, y=fc1$mean, color="pred")) + 
-  theme_light() + theme(legend.position = "right") + 
-  ggtitle("SARIMA vs. Ground Truth")
 ```
 
 ```{r}
@@ -441,12 +429,6 @@ fc2 <- forecast(fit2, xreg=cbind(precipitation1[,4],relative.humidity1[,4]
                                  ,min.temp1[,4],fwf), h =277)
 plot(fc2)
 accuracy(fc2$mean, as.integer(sjtest.ts1[,"total_cases"]))
-
-ggplot() + 
-  geom_line(mapping=aes(x=week_start_date, y=total_cases, color="ori"), data=sjdata.test) + 
-  geom_line(mapping=aes(x=sjdata.test$week_start_date, y=fc2$mean, color="pred")) + 
-  theme_light() + theme(legend.position = "right") + 
-  ggtitle("SARIMAX Lag 4 vs. Ground Truth")
 ```
 
 ```{r}
@@ -457,12 +439,6 @@ fc3 <- forecast(fit3, xreg=cbind(precipitation1[,1],relative.humidity1[,1]
                                  ,min.temp1[,1],fwf), h =277)
 plot(fc3)
 accuracy(fc3$mean,as.integer(sjtest.ts1[,"total_cases"]))
-
-ggplot() + 
-  geom_line(mapping=aes(x=week_start_date, y=total_cases, color="ori"), data=sjdata.test) + 
-  geom_line(mapping=aes(x=sjdata.test$week_start_date, y=fc3$mean, color="pred")) + 
-  theme_light() + theme(legend.position = "right") + 
-  ggtitle("SARIMAX Lag 1 vs. Ground Truth")
 ```
 
 ```{r}
@@ -470,11 +446,5 @@ ggplot() +
 fc4 <- forecast(fit4, xreg=sjtest.ts1[,5:23], h=277)
 autoplot(fc4)
 accuracy(fc4$mean,as.integer(sjtest.ts1[,"total_cases"]))
-
-ggplot() + 
-  geom_line(mapping=aes(x=week_start_date, y=total_cases, color="ori"), data=sjdata.test) + 
-  geom_line(mapping=aes(x=sjdata.test$week_start_date, y=fc4$mean, color="pred")) + 
-  theme_light() + theme(legend.position = "right") + 
-  ggtitle("Neural networks prediction vs. Ground Truth")
 ```
 
