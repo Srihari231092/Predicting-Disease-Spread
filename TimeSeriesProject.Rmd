@@ -19,8 +19,8 @@ rm(tmp.library.list)
 
 
 ```{r}
-trainraw <- data.table(read.csv("dengue_features_train.csv"), sep=',', stringsAsFactors = F)
-trainlraw <- data.table(read.csv("dengue_labels_train.csv"), sep=',', stringsAsFactors = F)
+trainraw <- data.table(read.csv("dengue_features.csv"), sep=',', stringsAsFactors = F)
+trainlraw <- data.table(read.csv("dengue_labels.csv"), sep=',', stringsAsFactors = F)
 
 head(trainraw)
 head(trainlraw)
@@ -33,28 +33,27 @@ dim(trainlraw)
 Merge the features data with the labels data
 
 ```{r}
-trainprep <- merge(trainraw, trainlraw, by=c("city", "year", "weekofyear"), all.x = T)
-nrow(trainprep) == nrow(trainraw) # if true, we did not accidentally merge many-to-one 
+sjdata <- merge(trainraw, trainlraw, by=c("city", "year", "weekofyear"), all.x = T)
+nrow(sjdata) == nrow(trainraw) # if true, we did not accidentally merge many-to-one 
 
-dim(trainprep)
+dim(sjdata)
 ```
 
 Omit reanalysis_sat_precip_amt_mm variable because of large amount of missing data
 
 ```{r message=FALSE, warning=FALSE}
-trainprep[, reanalysis_sat_precip_amt_mm := NULL]
+sjdata[, reanalysis_sat_precip_amt_mm := NULL]
 ```
 
 Sort the dataset so it's in a clear order
 ```{r}
-setkeyv(trainprep, c("city", "year", "weekofyear"))
+setkeyv(sjdata, c("city", "year", "weekofyear"))
 
-str(trainprep)
+str(sjdata)
 ```
 
-Only select data for 1 city: San Juan
 ```{r}
-sjdata <- trainprep[city=="sj"]
+head(sjdata)
 ```
 
 
@@ -62,7 +61,7 @@ sjdata <- trainprep[city=="sj"]
 
 Transform the Date column into the appropriate type
 ```{r}
-sjdata[,week_start_date := as.Date(week_start_date,format = "%Y-%m-%d")]
+sjdata[,week_start_date := as.Date(week_start_date,format = "%m/%d/%Y")]
 ```
 
 
