@@ -79,6 +79,7 @@ sjdata.test <- sjdata[week_start_date >= "2003-01-01"]
 
 ## Descriptive analytics and data visualisation
 
+
 ```{r}
 head(sjdata.train)
 
@@ -86,10 +87,29 @@ head(sjdata.train)
 summary(sjdata.train)
 
 # Correlation plots
-ggcorr(sjdata.train[, 5:24], label = TRUE, hjust = 0.85, size = 2,color = "grey50",
+ggcorr(sjdata.train[, 5:26], label = TRUE, hjust = 0.85, size = 2,color = "grey50",
        label_size = 2) +
   ggplot2::labs(title = "Correlation Plot (San Juan)")
+```
 
+```{r message=FALSE, warning=FALSE}
+ggplot(data=sjdata.train, aes(sjdata.train$total_cases)) + 
+  geom_histogram() + 
+  ggtitle("Distrbution of total cases of Dengue") 
+```
+
+```{r}
+library(dplyr)
+```
+
+
+```{r}
+(missing_idxs <- c(which(is.na(sjdata.train$total_cases), arr.ind=TRUE)))
+sjdata.train[missing_idxs,] %>% select(year, weekofyear, total_cases)
+```
+
+
+```{r}
 # Plot total cases with timeline -> seasonal effect
 ggplot(sjdata.train , aes(week_start_date, total_cases)) + 
   geom_line() + 
@@ -100,31 +120,44 @@ ggplot(sjdata.train , aes(week_start_date, total_cases)) +
   theme(axis.text.x=element_text(angle=-70, hjust=0.001)) +
   labs(title = "Time Series Plot of Total Cases (San Juan)") +
   theme_bw()
+```
 
+```{r}
 # Scatter Plot Total cases vs. Max Temperature
 plot(total_cases ~ station_max_temp_c, data=sjdata.train
      ,main = "Scatter Plot of Total Cases and Maximum Temperature in San Juan")
+```
 
+```{r}
 # Scatter Plot Total cases vs. Humidity
 plot(total_cases ~ reanalysis_specific_humidity_g_per_kg, data=sjdata.train,
      main = "Scatter Plot of Total Cases and Humidity in San Juan")
+```
 
+```{r}
 # Time Series Plot of log(Total cases) & Max Temperature
 ggplot(sjdata.train, aes(week_start_date)) +
   geom_line(aes(y = station_max_temp_c, colour = "station_max_temp_c")) +
   geom_line(aes(y = (y = log(total_cases+1)), 
                 colour = "log total_cases")) +
-  labs(title = "Time Series Plot of Log Total Cases and Maximum Temperature (San Juan)") +
-  theme_bw()
+  labs(title = "Log Total Cases and Maximum Temperature ") +
+  theme_bw() +theme(legend.position="bottom")
 
+ggsave("time_series_logtotalcases_maxtemp.png", width = 8, height = 6)
+
+```
+
+```{r}
 # Time Series Plot of log(Total cases) & Humidity
 ggplot(sjdata.train, aes(week_start_date)) +
   geom_line(aes(y = log(total_cases+1), 
                 colour = "log total_cases")) +
   geom_line(aes(y = reanalysis_specific_humidity_g_per_kg, 
                 colour = "reanalysis_specific _humidity_g_per_kg")) +
-  labs(title = "Time Series Plot of Log Total Cases and Humidity (San Juan)") +
-  theme_bw()
+  labs(title = "Log Total Cases and Humidity") +
+  theme_bw() + theme(legend.position="bottom")
+
+ggsave("time_series_logtotalcases_humidity.png", width = 8, height = 6)
 ```
 
 
@@ -202,15 +235,15 @@ checkresiduals(sj.fit1)
 Let's take the fourier transform of the signal and evaluate the model residuals
 
 ```{r}
-fit <- list(aicc=Inf)
-for(i in 1:25)
-{
-  fit1 <- auto.arima(sjtrain.ts, xreg=fourier(sjtrain.ts, K=i), seasonal=F)
-  if(fit$aicc < fit1$aicc)
-    fit1 <- fit
-  else break;
-}
-fit1
+# fit <- list(aicc=Inf)
+# for(i in 1:25)
+# {
+#   fit1 <- auto.arima(sjtrain.ts, xreg=fourier(sjtrain.ts, K=i), seasonal=F)
+#   if(fit$aicc < fit1$aicc)
+#     fit1 <- fit
+#   else break;
+# }
+# fit1
 ```
 
 ```{r}
