@@ -1,13 +1,13 @@
 ---
-title: "TimeSeriesProject"
+title: "Forecasting Dengue Spread"
 author: "Srihari Seshadri, Siddhartha Khetawat"
-date: "June 5, 2019"
+date: "June 3, 2019"
 output: html_document
 ---
 
 ```{r message=FALSE, warning=FALSE}
 # Load libraries and install them, if necessary
-tmp.library.list <- c("haven", "zoo", "fUnitRoots", "tseries", "urca", "lmtest", "forecast", "data.table", "readxl","reshape", "quantmod", "ggplot2", "reshape2", "plyr","scales", "hts", "fpp2", "lubridate","stargazer","GGally", "dplyr", "lattice")
+tmp.library.list <- c("haven", "zoo", "fUnitRoots", "tseries", "urca", "lmtest", "forecast", "data.table", "readxl","reshape", "quantmod", "ggplot2", "reshape2", "plyr","scales", "hts", "fpp2", "lubridate","stargazer","GGally", "dplyr", "lattice", "skimr")
 for (i in 1:length(tmp.library.list)) {
   if (!tmp.library.list[i] %in% rownames(installed.packages())) {
     install.packages(tmp.library.list[i])
@@ -17,6 +17,8 @@ for (i in 1:length(tmp.library.list)) {
 rm(tmp.library.list)
 ```
 
+
+# Loading the Data
 
 ```{r}
 trainraw <- data.table(read.csv("dengue_features.csv"), sep=',', stringsAsFactors = F)
@@ -46,10 +48,10 @@ sjdata[, reanalysis_sat_precip_amt_mm := NULL]
 ```
 
 Sort the dataset so it's in a clear order
+
 ```{r}
 setkeyv(sjdata, c("city", "year", "weekofyear"))
 
-library(skimr)
 skim(sjdata)
 ```
 
@@ -58,7 +60,7 @@ head(sjdata)
 ```
 
 
-## Splitting the data into training and testing datasets
+# Splitting the data into training and testing datasets
 
 Transform the Date column into the appropriate type
 ```{r}
@@ -78,7 +80,7 @@ sjdata.train <- sjdata[week_start_date < "2003-01-01"]
 sjdata.test <- sjdata[week_start_date >= "2003-01-01"]
 ```
 
-## Descriptive analytics and data visualisation
+# Descriptive analytics and data visualisation
 
 
 ```{r}
@@ -166,7 +168,7 @@ ggsave("./Charts/time_series_logtotalcases_humidity.png", width = 8, height = 6)
 ```
 
 
-## Data imputation
+# Data Imputation
 
 ```{r}
 # Build a function to impute data with the most recent that is non missing (Using LOCF)
@@ -180,7 +182,7 @@ summary(sjdata.train.imputed)
 sjdata.train <- sjdata.train.imputed
 ```
 
-## Diagnostic study
+# Diagnostic study
 
 ```{r}
 # Convert data to TS with weekly frequency
@@ -227,11 +229,11 @@ decomp = stl(sjtrain.ts, s.window="periodic")
 plot(decomp)
 ```
 
-## Modeling
+# Modeling
 
 The following models were used for forecasting dengue spread.
 
-### ARIMA
+## ARIMA
 
 Use ARIMA without seasonality on the training data and analyse the residuals.
 
@@ -243,7 +245,7 @@ checkresiduals(sj.fit1)
 ```
 
 
-### SARIMA
+## SARIMA
 
 Apply Seasonal ARIMA to the data and analyse the residuals.
 
@@ -255,7 +257,7 @@ checkresiduals(sj.fit2)
 ```
 
 
-### SARIMAX
+## SARIMAX
 
 ```{r, warning=FALSE}
 # Prepare xreg
@@ -361,7 +363,7 @@ sj.fit3
 checkresiduals(sj.fit3)
 ```
 
-### Neural Network
+## Neural Network
 
 ```{r}
 # Fit Neural Network
@@ -376,7 +378,7 @@ Box.test(sj.fit4$residuals, type = "Ljung-Box")
 ```
 
 
-## Model Selection
+# Model Selection
 
 ```{r, warning=FALSE}
 # Fill in NAs
@@ -414,7 +416,7 @@ min.temp1 <- create.tslag(x = "station_min_temp_c"
 
 ```
 
-### Evaluate the model accuracies
+## Evaluate the model accuracies
 
 ```{r}
 # Model 1 (ARIMA)
@@ -485,4 +487,7 @@ ggsave("./Charts/Neural networks prediction vs. Ground Truth.png", width = 8, he
 
 ```
 
+```{r}
+
+```
 
